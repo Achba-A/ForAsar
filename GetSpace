@@ -1,0 +1,353 @@
+using System;
+using System.Linq;
+
+namespace GetSpace
+{
+    public class TheGame
+    {
+        const int n = 10;
+        public string[,] M = new string[n, n];
+        public int[] score = new int[] { 0, 0 };
+        public string name, name1;
+        public int turn = 1;
+        int row = 0;
+        int col = 0;
+        public string m = "2";
+        public void board()
+        {
+            for (var i = 0; i < n; i++)
+            {
+                for (var j = 0; j < n; j++)
+                {
+                    M[i, j] = "-";
+                }
+            }
+        }
+        public void playersName()
+        {
+            Console.Write("\nВведите имя первого игрока: ");
+            name = Console.ReadLine();
+            Console.Write("Введите имя второго игрока: ");
+            name1 = Console.ReadLine();
+        }
+        public void show()
+        {
+            Console.WriteLine($"{row} x {col}");
+        }
+        public void takePoints()
+        {
+            turn++;
+            Random rnd = new Random();
+            row = rnd.Next(1, 5);
+            col = rnd.Next(1, 5);
+            Console.WriteLine($"{row} x {col}");
+        }
+        public void figure()
+        {
+            string result;
+            if (turn % 2 == 0) result = string.Concat(Enumerable.Repeat(" X ", col));
+            else result = string.Concat(Enumerable.Repeat(" O ", col));
+            Console.WriteLine("\nВаша фигура:");
+
+            for (var i = 0; i < row; i++) Console.WriteLine(result);
+            Console.WriteLine();
+
+        }
+        public int watchOutV(int a, int b, int c)
+        {
+            int count = 0;
+            if (turn % 2 == 0)
+            {
+                for (var i = a; i < b; i++)
+                {
+                    if (M[i, c] == "X")
+                    {
+                        count++;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+
+                for (var i = a; i < b; i++)
+                {
+                    if (M[i, c] == "O")
+                    {
+                        count++;
+                        break;
+                    }
+                }
+            }
+            return count;
+        }
+        public int watchOutH(int a, int b, int c)
+        {
+            int count = 0;
+            if (turn % 2 == 0)
+            {
+
+                for (var i = a; i < b; i++)
+                {
+                    if (M[c, i] == "X")
+                    {
+                        count++;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                for (var i = a; i < b; i++)
+                {
+                    if (M[c, i] == "O")
+                    {
+                        count++;
+                        break;
+                    }
+                }
+            }
+            return count;
+        }
+
+        public int checkMoove(int startCol, int startRow)
+        {
+            int count = 0;
+            string walk = "here";
+            try
+            {
+                int k = 0;
+                if ((startRow == 0) && (startCol == 0) || (startRow == n - 1) && (startCol == n - 1))
+                {
+                    k = 1;
+                    walk = "away";
+                }
+
+                if (turn % 2 == 0)
+                {
+
+                    if (walk != "away")
+                    {
+                        if (startCol != 0) k += watchOutV(startRow, startRow + row, startCol - 1);
+                        if (startCol + col < n - 1) k += watchOutV(startRow, startRow + row, startCol + col);
+
+                        if (startRow != 0) k += watchOutH(startCol, startCol + col, startRow - 1);
+                        if (startRow + row < n - 1) k += watchOutH(startCol, startCol + col, startRow + row);
+                    }
+
+                    for (var i = startRow; i < row + startRow; i++)
+                    {
+                        for (var j = startCol; j < col + startCol; j++)
+                        {
+                            if (M[i, j] != "-")
+                            {
+                                count++;
+                                break;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+
+                    if (walk != "away")
+                    {
+                        if (startCol != 9) k += watchOutV(startRow - row + 1, startRow + 1, startCol + 1);
+                        if (startCol - col > 1) k += watchOutV(startRow - row + 1, startRow + 1, startCol - col);
+
+                        if (startRow != 9) k += watchOutH(startCol - col + 1, startCol + 1, startRow + 1);
+                        if (startRow - row > 1) k += watchOutH(startCol - col + 1, startCol + 1, startRow - row);
+                    }
+
+                    for (var i = startRow; i > startRow - row; i--)
+                    {
+                        for (var j = startCol; j > startCol - col; j--)
+                        {
+                            if (M[i, j] != "-")
+                            {
+                                count++;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if ((count != 0) || (k == 0))
+                {
+                    Console.WriteLine("\nЭта позиция недоступна. " +
+                    "\nНажмите <1>, чтобы уступить ход сопернику, нажмите <0>, чтобы сменить позицию.");
+                    m = Console.ReadLine();
+                }
+                return 1;
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("\nError Code: TRASHHOOKHANDS \nВы сломали игру... ");
+                return 0;
+            }
+        }
+        public void playerMoove(int startCol, int startRow)
+        {
+            if (m != "1")
+            {
+                if (turn % 2 == 0)
+                {
+                    for (var i = startRow; i < row + startRow; i++)
+                    {
+                        for (var j = startCol; j < col + startCol; j++)
+                        {
+                            M[i, j] = "X";
+                        }
+                    }
+                    player(row, col);
+
+                }
+                else
+                {
+                    for (var i = startRow; i > startRow - row; i--)
+                    {
+                        for (var j = startCol; j > startCol - col; j--)
+                        {
+                            M[i, j] = "O";
+                        }
+                    }
+                    player1(row, col);
+                }
+            }
+            m = "2";
+            takePoints();
+        }
+
+        public void player(int a, int b)
+        {
+            score[0] += a * b;
+        }
+        public void player1(int a, int b)
+        {
+            score[1] += a * b;
+        }
+    }
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            TheGame k = new TheGame();
+            Console.WriteLine("Фигуры игрока должны быть присоединены к его существующей территории." +
+                "\nФигуры игрока №1 располоргаются слева направо, сверху вниз. " +
+                "\nФигуры игрока №2 располагаются справа налево, снизу вверх. " +
+                "\nПобеждает тот кто набрал более 50 очков. " +
+                "\nПожалуйста не выходите за границы игрового поля!" +
+                "\nПеремещение — стрелочки, пробел — выбор поля.");
+            k.board();
+            k.playersName();
+            Console.CursorVisible = false;
+            int x = 0;
+            int y = 0;
+            int x1 = 9;
+            int y1 = 9;
+            k.takePoints();
+            while (true)
+            {
+                int samsa = 0;
+                int samsa1 = 0;
+                Console.Clear();
+                Console.WriteLine($"{k.name} \t{k.name1}");
+                Console.WriteLine($"{k.score[0]} \t{k.score[1]}");
+                k.show();
+                k.figure();
+                for (int i = 0; i < 10; i++)
+                {
+                    for (int j = 0; j < 10; j++)
+                    {
+                        if (k.turn % 2 == 0)
+                        {
+                            if (i == y && j == x)
+                            {
+                                Console.BackgroundColor = ConsoleColor.White;
+                                Console.ForegroundColor = ConsoleColor.Black;
+                            }
+                        }
+                        else
+                        {
+                            if (i == y1 && j == x1)
+                            {
+                                Console.BackgroundColor = ConsoleColor.White;
+                                Console.ForegroundColor = ConsoleColor.Black;
+                            }
+                        }
+                        Console.Write($" {k.M[i, j]} ");
+                        Console.ResetColor();
+                    }
+                    Console.WriteLine();
+                }
+                var key = Console.ReadKey().Key;
+                if (k.turn % 2 == 0)
+                {
+                    if (key == ConsoleKey.Spacebar)
+                    {
+                        samsa = k.checkMoove(x, y);
+                        if (samsa == 1)
+                        {
+                            if (k.m == "0")
+                            {
+                                k.m = "2";
+                                continue;
+
+                            }
+                            else k.playerMoove(x, y);
+                        }
+                        else continue;
+                    }
+                    else if (key == ConsoleKey.LeftArrow) x--;
+                    else if (key == ConsoleKey.RightArrow) x++;
+                    else if (key == ConsoleKey.UpArrow) y--;
+                    else if (key == ConsoleKey.DownArrow) y++;
+                }
+                else
+                {
+                    if (key == ConsoleKey.Spacebar)
+                    {
+                        if (key == ConsoleKey.Spacebar)
+                        {
+                            samsa1 = k.checkMoove(x1, y1);
+                            if (samsa1 == 1)
+                            {
+                                if (k.m == "0")
+                                {
+                                    k.m = "2";
+                                    continue;
+                                }
+                                else k.playerMoove(x1, y1);
+                            }
+                            else continue;
+                        }
+                    }
+                    else if (key == ConsoleKey.LeftArrow) x1--;
+                    else if (key == ConsoleKey.RightArrow) x1++;
+                    else if (key == ConsoleKey.UpArrow) y1--;
+                    else if (key == ConsoleKey.DownArrow) y1++;
+                    //else if (key == ConsoleKey.A) x1--;
+                    //else if (key == ConsoleKey.D) x1++;
+                    //else if (key == ConsoleKey.W) y1--;
+                    //else if (key == ConsoleKey.S) y1++;
+                }
+                x1 = clamp(x1, 0, 9);
+                y1 = clamp(y1, 0, 9);
+                x = clamp(x, 0, 9);
+                y = clamp(y, 0, 9);
+                if ((k.score[1] > 50) || (k.score[0] > 50)) break;
+            }
+            Console.Clear();
+            Console.WriteLine($"{k.name} \t{k.name1}");
+            Console.WriteLine($"{k.score[0]} \t{k.score[1]}");
+            if (k.score[1] > k.score[0]) Console.WriteLine("\nПобедил " + k.name1 + "!");
+            else if (k.score[0] > k.score[1]) Console.WriteLine("\nПобедил " + k.name + "!");
+            else Console.WriteLine("Победила ДРУЖБА!");
+        }
+        private static int clamp(int value, int min, int max)
+        {
+            if (value < min) return max;
+            if (value > max) return min;
+            return value;
+        }
+    }
+}
